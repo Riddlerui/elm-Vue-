@@ -220,7 +220,7 @@
       opacity 1
       background rgba(7, 17, 27, .8)
       backdrop-filter blur(10px)
-      &.fade-enter-active, &.fade-enter
+      &.fade-enter-active, &.fade-leave-active
         opacity 0
         background rgba(7, 17, 27, 0)
       .detail-wapper

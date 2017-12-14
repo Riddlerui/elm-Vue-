@@ -28,7 +28,7 @@
                   <span class="now">￥{{ food.price }}</span><span v-show="food.oldPrice" class="old">￥{{ food.oldPrice }}</span>
                 </div>
                 <div class="cartcontrol-warpper">
-                  <cartcontrol :food="food"></cartcontrol>
+                  <cartcontrol @add="addFood" :food="food"></cartcontrol>
                 </div>
               </div>
             </li>
@@ -36,21 +36,21 @@
         </li>
       </ul>
     </div>
-    <shopcart :delivery-price="seller.deliveryPrice" :min-price="seller.minPrice">
+    <shopcart ref="shopcart" :select-foods="selectFoods" :delivery-price="seller.deliveryPrice" :min-price="seller.minPrice">
     </shopcart>
   </div>
 </template>
 <script type="text/ecmascript-6">
 import BScroll from 'better-scroll'
-import shopcart from '../shopcart/shopcart'
-import cartcontrol from '../cartcontrol/cartcontrol'
+import shopcart from '@/components/shopcart/shopcart'
+import cartcontrol from '@/components/cartcontrol/cartcontrol'
 
 const ERR_OK = 0
 
 export default {
   props: {
     seller: {
-      type: Number
+      type: Object
     }
   },
   data () {
@@ -70,6 +70,17 @@ export default {
         }
       }
       return 0
+    },
+    selectFoods () {
+      let foods = []
+      this.goods.forEach((good) => {
+        good.foods.forEach((food) => {
+          if (food.count) {
+            foods.push(food)
+          }
+        })
+      })
+      return foods
     }
   },
   created () {
@@ -96,12 +107,21 @@ export default {
       let el = foodList[index]
       this.foodsScroll.scrollToElement(el, 300)
     },
+    addFood (target) {
+      this._drop(target)
+    },
+    _drop (target) {
+      this.$nextTick(() => {
+        this.$refs.shopcart.drop(target)
+      })
+    },
     _initScroll () {
       this.menuScroll = new BScroll(this.$refs.menuWarpper, {
         click: true
       })
       this.foodsScroll = new BScroll(this.$refs.foodsWarpper, {
-        probeType: 3
+        probeType: 3,
+        click: true
       })
 
       this.foodsScroll.on('scroll', (pos) => {
@@ -225,6 +245,9 @@ export default {
               text-decoration line-through
               font-size 10px
               color rgb(147, 153, 159)
-
+          .cartcontrol-warpper
+            position absolute
+            right 0
+            bottom 6px
 
 </style>
