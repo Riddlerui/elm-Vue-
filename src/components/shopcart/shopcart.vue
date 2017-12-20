@@ -1,6 +1,6 @@
 <template>
   <div class="shopcart">
-    <div class="content">
+    <div class="content" @click="toggleList">
       <div class="content-left">
         <div class="logo-warpper">
           <div class="logo" :class="{'highlight':totalCount>0}">
@@ -18,7 +18,7 @@
       </div> 
     </div>
     <div class="ball-container">
-      <div v-for="(ball, index) in balls" :key="index">
+      <div v-for="ball in balls">
         <transition name="drop" @before-enter="beforeDrop" @enter="dropping" @after-enter="afterDrop">
            <div v-show="ball.show" class="ball">
             <div class="inner inner-hook"></div>
@@ -26,10 +26,32 @@
         </transition>
       </div> 
     </div>
+   <transition name="fold">
+      <div class="shopcart-list" v-show="listShow">
+        <div class="list-header">
+          <h1 class="title">购物车</h1>
+          <span class="empty">清空</span>
+        </div>
+        <div class="list-content">
+          <ul>
+            <li class="food" v-for="food in selectFoods">
+              <span class="name">{{ food.name }}</span>
+              <div class="price">
+                <span>￥{{ food.price*food.count }}</span>
+              </div>
+              <div class="cartcontrol-wrapper">
+                <cartcontrol :food="food"></cartcontrol>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </transition>
   </div>
 </template>
 
-<script>
+<script type="text/ecmascript-6">
+  import cartcontrol from '@/components/cartcontrol/cartcontrol'
   export default {
     props: {
       selectFoods: {
@@ -71,7 +93,8 @@
             show: false
           }
         ],
-        dropBalls: []
+        dropBalls: [],
+        fold: true
       }
     },
     computed: {
@@ -107,10 +130,19 @@
         } else {
           return 'enough'
         }
+      },
+      listShow () {
+        if (!this.totalCount) {
+          this.fold = true
+          return false
+        }
+        let show = !this.fold
+        return show
       }
     },
     methods: {
       drop (el) {
+        console.log(el)
         for (let i = 0; i < this.balls.length; i++) {
           let ball = this.balls[i]
           if (!ball.show) {
@@ -120,6 +152,12 @@
             return
           }
         }
+      },
+      toggleList () {
+        if (!this.totalCount) {
+          return
+        }
+        this.fold = !this.fold
       },
       beforeDrop (el) {
         let count = this.balls.length
@@ -138,7 +176,7 @@
           }
         }
       },
-      dropping (el) {
+      dropping (el, done) {
         /* eslint-disable no-unused-vars */
         let rf = el.offsetHeight
         this.$nextTick(() => {
@@ -147,6 +185,7 @@
           let inner = el.getElementsByClassName('inner-hook')[0]
           inner.webkitTransform = 'translate3d(0, 0, 0)'
           inner.transform = 'translate3d(0, 0, 0)'
+          el.addEventListener('transitionend', done)
         })
       },
       afterDrop (el) {
@@ -156,6 +195,9 @@
           el.style.display = 'none'
         }
       }
+    },
+    components: {
+      cartcontrol
     }
   }
 </script>
@@ -261,5 +303,29 @@
         border-radius 50%
         background rgb(0 ,160, 220)
         transition all 0.4s linear
-
+  .shopcart-list
+    position absolute
+    top 0
+    left 0
+    z-index -1
+    width 100%
+    transform translate3d(0, -100% 0)
+    &.fold-enter-active, &.fold-leave-active
+      transition all 0.5s
+    &.fold-enter, &.fold-leave-active
+      transform translate3d(0, 0, 0)
+    .list-header
+      height 40px
+      line-height 40px
+      padding 0 18px
+      background #f3f5f7
+      border-bottom 1px solid rgba(7, 17, 27, 0.1)
+      .title
+        float left
+        font-size 14px
+        color rgba(7, 17, 27, 0.1)
+      .empty
+        float right
+        font-size 12px
+        color rgb(0, 160, 220)
 </style>
