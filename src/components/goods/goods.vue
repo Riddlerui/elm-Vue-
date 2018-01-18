@@ -28,7 +28,7 @@
                   <span class="now">￥{{ food.price }}</span><span v-show="food.oldPrice" class="old">￥{{ food.oldPrice }}</span>
                 </div>
                 <div class="cartcontrol-wrapper">
-                  <cartcontrol @add="addFood" :food="food"></cartcontrol>
+                  <cartcontrol @cartAdd="addFood" :food="food"></cartcontrol>
                 </div>
               </div>
             </li>
@@ -124,7 +124,7 @@ export default {
         click: true
       })
 
-      this.foodsScroll.on('scroll', (pos) => {
+      this.foodsScroll.on('scroll', pos => {
         this.scrollY = Math.abs(Math.round(pos.y))
       })
     },
